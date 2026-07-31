@@ -90,7 +90,7 @@ export default function LoginPage() {
         </GlassCard>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="font-semibold text-primary hover:underline">
             Sign up for free
           </Link>

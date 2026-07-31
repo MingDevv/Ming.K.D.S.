@@ -21,6 +21,13 @@ const defaultVariants: Variants = {
   },
 };
 
+const motionComponents = {
+  div: motion.div,
+  section: motion.section,
+  article: motion.article,
+  aside: motion.aside,
+};
+
 export function AnimatedContainer({
   children,
   className,
@@ -29,7 +36,7 @@ export function AnimatedContainer({
   once = true,
   as = "div",
 }: AnimatedContainerProps) {
-  const Component = motion.create(as);
+  const Component = motionComponents[as];
 
   return (
     <Component

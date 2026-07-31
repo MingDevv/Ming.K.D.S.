@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Upload, FileUp, X, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { formatFileSize } from "@/lib/utils";
+import { Upload, FileUp, X, CheckCircle2, Zap } from "lucide-react";
+import { categories, type ToolDefinition } from "@/config/tools";
+import { cn, formatFileSize } from "@/lib/utils";
 import { fadeInUp } from "@/styles/animations";
 
 export function UploadArea() {
@@ -37,6 +38,17 @@ export function UploadArea() {
     setSelectedFile(null);
   }, []);
 
+  // Matching tools based on file extension
+  const matchingTools = useMemo(() => {
+    if (!selectedFile) return [];
+    const ext = "." + selectedFile.name.split(".").pop()?.toLowerCase();
+    const allTools = categories.flatMap((c) => c.tools);
+    const matches = allTools.filter(
+      (t) => t.isEnabled && t.inputFormats.includes(ext)
+    );
+    return matches.length > 0 ? matches : allTools.filter((t) => t.isEnabled);
+  }, [selectedFile]);
+
   return (
     <section className="py-16 sm:py-20">
       <motion.div
@@ -51,7 +63,7 @@ export function UploadArea() {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={cn(
-            "glass-card relative flex flex-col items-center justify-center rounded-3xl border-2 border-dashed p-12 text-center transition-all duration-300 sm:p-16",
+            "glass-card relative flex flex-col items-center justify-center rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-300 sm:p-14",
             isDragging
               ? "border-primary bg-primary/5 scale-[1.02]"
               : "border-border hover:border-primary/50",
@@ -95,8 +107,8 @@ export function UploadArea() {
               </p>
             </>
           ) : (
-            <>
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-500/10 text-green-600 dark:text-green-400">
+            <div className="w-full">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-500/10 text-green-600 dark:text-green-400">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
 
@@ -105,28 +117,46 @@ export function UploadArea() {
                 {formatFileSize(selectedFile.size)}
               </p>
 
-              <div className="mt-6 flex items-center gap-3">
-                <button
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-primary/40 hover:brightness-110"
-                  onClick={() => {
-                    // Navigate to tools page (UI only for now)
-                    window.location.href = "/tools";
-                  }}
-                >
-                  Choose Conversion
-                </button>
+              {/* Tool Suggestions */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Select a Conversion Tool:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-1">
+                  {matchingTools.map((tool: ToolDefinition) => (
+                    <Link
+                      key={tool.id}
+                      href={`/tools/${tool.slug}`}
+                      className="flex items-center justify-between p-3 rounded-xl bg-background border border-border hover:border-primary/50 transition-colors text-left group"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {tool.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {tool.outputFormats.join(", ")}
+                        </div>
+                      </div>
+                      <Zap className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-center gap-3">
                 <button
                   onClick={clearFile}
-                  className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2.5 text-sm font-medium transition-colors hover:bg-secondary/80"
+                  className="inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-2 text-xs font-medium transition-colors hover:bg-secondary/80"
                 >
-                  <X className="h-4 w-4" />
-                  Remove
+                  <X className="h-3.5 w-3.5" />
+                  Remove File
                 </button>
               </div>
-            </>
+            </div>
           )}
         </div>
       </motion.div>
     </section>
   );
 }
+

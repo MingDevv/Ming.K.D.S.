@@ -44,18 +44,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Update Supabase session
-  const response = await updateSession(request);
-
-  // For now, skip auth checks if Supabase isn't configured
+  // Skip Supabase session update if Supabase isn't configured
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
-    return response;
+    return NextResponse.next();
   }
 
-  return response;
+  // Update Supabase session
+  return await updateSession(request);
 }
 
 export const config = {

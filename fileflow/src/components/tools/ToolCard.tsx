@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Crown, ArrowRight, Lock } from "lucide-react";
 import type { ToolDefinition, CategoryDefinition } from "@/config/tools";
 import { cn } from "@/lib/utils";
@@ -9,12 +10,12 @@ interface ToolCardProps {
   category?: CategoryDefinition;
 }
 
-export function ToolCard({ tool, category }: ToolCardProps) {
-  return (
+export function ToolCard({ tool }: ToolCardProps) {
+  const content = (
     <div
       className={cn(
-        "glass-card group relative flex flex-col justify-between rounded-2xl p-6 transition-all",
-        !tool.isEnabled && "opacity-80"
+        "glass-card group relative flex flex-col justify-between rounded-2xl p-6 transition-all hover:scale-[1.02] hover:border-primary/50",
+        !tool.isEnabled && "opacity-75 cursor-not-allowed hover:scale-100 hover:border-border"
       )}
     >
       <div>
@@ -53,10 +54,19 @@ export function ToolCard({ tool, category }: ToolCardProps) {
           <span className="font-mono">{tool.outputFormats.join(", ")}</span>
         </div>
 
-        <span className="text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 flex items-center gap-1">
-          Convert <ArrowRight className="h-3 w-3" />
-        </span>
+        {tool.isEnabled && (
+          <span className="text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 flex items-center gap-1">
+            Convert <ArrowRight className="h-3 w-3" />
+          </span>
+        )}
       </div>
     </div>
   );
+
+  if (tool.isEnabled) {
+    return <Link href={`/tools/${tool.slug}`}>{content}</Link>;
+  }
+
+  return content;
 }
+

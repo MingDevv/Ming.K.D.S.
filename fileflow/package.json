@@ -11,11 +11,17 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/papaparse": "^5.5.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
+    "js-yaml": "^5.2.2",
     "lucide-react": "^1.27.0",
+    "marked": "^18.0.7",
     "next": "16.2.12",
+    "papaparse": "^5.5.4",
+    "pdf-lib": "^1.17.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.6.0"
