@@ -12,6 +12,8 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error: Error | null }>;
   signInWithOAuth: (provider: "github" | "google") => Promise<{ error: Error | null }>;
+  resetPasswordForEmail: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -132,6 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: name,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       return { error };
@@ -172,6 +175,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetPasswordForEmail = async (email: string) => {
+    if (isDemoMode) {
+      return { error: null };
+    }
+
+    try {
+      const redirectTo = `${window.location.origin}/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+      return { error };
+    } catch (err: unknown) {
+      return { error: err as Error };
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    if (isDemoMode) {
+      return { error: null };
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
+      return { error };
+    } catch (err: unknown) {
+      return { error: err as Error };
+    }
+  };
+
   const signOut = async () => {
     if (isDemoMode) {
       localStorage.removeItem(DEMO_USER_KEY);
@@ -199,6 +233,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithEmail,
         signUpWithEmail,
         signInWithOAuth,
+        resetPasswordForEmail,
+        updatePassword,
         signOut,
       }}
     >

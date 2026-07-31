@@ -34,8 +34,8 @@ export function PopularTools() {
             return (
               <motion.div key={tool.id} variants={staggerItem}>
                 <Link
-                  href={`/tools#${tool.category}`}
-                  className="glass-card group flex items-start gap-4 rounded-2xl p-6 transition-all"
+                  href={`/tools/${tool.slug}`}
+                  className="glass-card group flex items-start gap-4 rounded-2xl p-6 transition-all hover:scale-[1.02] hover:border-primary/50"
                 >
                   <div
                     className={cn(

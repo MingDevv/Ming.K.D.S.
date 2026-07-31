@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { fadeInUp, staggerContainer, staggerItem } from "@/styles/animations";
-import { totalToolCount } from "@/config/tools";
+import { totalLiveToolCount, totalComingSoonCount } from "@/config/tools";
 
 export function Hero() {
   return (
@@ -75,9 +75,9 @@ export function Hero() {
             className="mt-16 flex items-center justify-center gap-8 sm:gap-16"
           >
             {[
-              { value: `${totalToolCount}+`, label: "Conversion Tools" },
-              { value: "Free", label: "No Signup Required" },
-              { value: "100%", label: "Browser-Based" },
+              { value: `${totalLiveToolCount} Live`, label: "Instant Tools Available" },
+              { value: `${totalComingSoonCount}+`, label: "Coming Soon" },
+              { value: "100%", label: "In-Browser Privacy" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-2xl font-bold sm:text-3xl">{stat.value}</p>

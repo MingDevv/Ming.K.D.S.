@@ -476,15 +476,28 @@ export function searchTools(query: string): ToolDefinition[] {
   );
 }
 
+export function getLiveTools(): ToolDefinition[] {
+  return getAllTools().filter((t) => t.isEnabled);
+}
+
+export function getComingSoonTools(): ToolDefinition[] {
+  return getAllTools().filter((t) => !t.isEnabled);
+}
+
 export function getPopularTools(): ToolDefinition[] {
   return [
-    getToolById("pdf-to-word")!,
     getToolById("png-to-jpg")!,
-    getToolById("mp4-to-gif")!,
-    getToolById("mp3-to-wav")!,
-    getToolById("word-to-pdf")!,
+    getToolById("jpg-to-png")!,
+    getToolById("merge-pdf")!,
+    getToolById("jpg-to-pdf")!,
     getToolById("json-to-csv")!,
-  ].filter(Boolean);
+    getToolById("image-resize")!,
+  ].filter((t) => t && t.isEnabled);
 }
 
 export const totalToolCount = categories.reduce((acc, c) => acc + c.tools.length, 0);
+export const totalLiveToolCount = categories.reduce(
+  (acc, c) => acc + c.tools.filter((t) => t.isEnabled).length,
+  0
+);
+export const totalComingSoonCount = totalToolCount - totalLiveToolCount;
