@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Mail, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Mail, Loader2, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Logo } from "@/components/shared/Logo";
 import { GithubIcon } from "@/components/shared/Icons";
@@ -16,7 +16,7 @@ function LoginForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const { signInWithEmail, signInWithOAuth } = useAuth();
+  const { signInWithEmail, signInWithOAuth, isDemoMode } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryError = searchParams.get("error");
@@ -36,7 +36,7 @@ function LoginForm() {
       setSuccessMsg("Signed in successfully! Redirecting...");
       setTimeout(() => {
         router.push("/dashboard");
-      }, 1000);
+      }, 800);
     }
   };
 
@@ -47,11 +47,28 @@ function LoginForm() {
     if (error) {
       setErrorMsg(error.message);
       setLoading(false);
+    } else {
+      setSuccessMsg("Signed in successfully! Redirecting...");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 800);
     }
   };
 
   return (
     <GlassCard className="p-8">
+      {isDemoMode && (
+        <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-primary/10 p-3.5 text-xs text-primary border border-primary/20">
+          <Info className="h-4 w-4 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold mb-0.5">Demo Mode Active</p>
+            <p className="text-muted-foreground text-[11px]">
+              You can sign in with any email & password to test the app dashboard immediately.
+            </p>
+          </div>
+        </div>
+      )}
+
       {(errorMsg || queryError) && (
         <div className="mb-4 flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-xs text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
