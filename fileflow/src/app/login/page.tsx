@@ -154,6 +154,15 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to dashboard if already logged in
+  if (!authLoading && user) {
+    router.push("/dashboard");
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center pt-24 pb-16 px-4">
       <div className="w-full max-w-md">

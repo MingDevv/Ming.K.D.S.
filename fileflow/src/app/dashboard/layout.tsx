@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { dashboardNavItems } from "@/config/navigation";
-import { GlassCard } from "@/components/shared/GlassCard";
-import { Logo } from "@/components/shared/Logo";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
@@ -14,27 +14,34 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center pt-24">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Logo />
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <div className="flex items-center gap-2 rounded-full bg-secondary p-1 pr-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                JD
-              </div>
-              <span className="text-xs font-medium">Jane Doe</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Layout */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="pt-20 pb-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-[220px_1fr] lg:grid-cols-[250px_1fr]">
           {/* Sidebar */}
           <aside className="space-y-2">
@@ -59,6 +66,16 @@ export default function DashboardLayout({
                     </Link>
                   );
                 })}
+
+                <div className="my-2 h-px bg-border/50" />
+
+                <button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
               </nav>
             </div>
           </aside>

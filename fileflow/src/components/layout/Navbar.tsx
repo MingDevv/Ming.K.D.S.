@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "./ThemeToggle";
@@ -14,7 +14,13 @@ import { useAuth } from "@/context/AuthContext";
 export function Navbar() {
   const pathname = usePathname();
   const { isScrolled } = useScrollPosition();
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <header
@@ -54,19 +60,21 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {user ? (
-            <div className="hidden items-center gap-3 md:flex">
+          {loading ? (
+            <div className="hidden md:block h-8 w-24 animate-pulse rounded-lg bg-secondary/50" />
+          ) : user ? (
+            <div className="hidden items-center gap-2 md:flex">
               <Link
-                href="/profile"
+                href="/dashboard"
                 className="flex items-center gap-2 rounded-lg bg-secondary/60 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-secondary"
               >
                 <UserIcon className="h-3.5 w-3.5 text-primary" />
                 <span className="max-w-[120px] truncate">
-                  {user.user_metadata?.full_name || user.email}
+                  {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
                 </span>
               </Link>
               <button
-                onClick={() => signOut()}
+                onClick={handleSignOut}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
               >
                 <LogOut className="h-3.5 w-3.5" />

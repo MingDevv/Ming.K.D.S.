@@ -2,14 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X, LogIn, UserPlus } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, LogIn, UserPlus, LogOut, User as UserIcon } from "lucide-react";
 import { mainNavItems } from "@/config/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    setIsOpen(false);
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <div className="md:hidden">
@@ -56,23 +65,44 @@ export function MobileNav() {
 
           <div className="my-4 h-px bg-border" />
 
-          <Link
-            href="/login"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          >
-            <LogIn className="h-4 w-4" />
-            Sign In
-          </Link>
-
-          <Link
-            href="/register"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-primary/40"
-          >
-            <UserPlus className="h-4 w-4" />
-            Get Started
-          </Link>
+          {user ? (
+            <>
+              <Link
+                href="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <UserIcon className="h-4 w-4" />
+                Dashboard
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-primary/40"
+              >
+                <UserPlus className="h-4 w-4" />
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>
