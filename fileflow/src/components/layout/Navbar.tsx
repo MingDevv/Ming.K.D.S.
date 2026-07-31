@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, LayoutDashboard } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "./ThemeToggle";
 import { MobileNav } from "./MobileNav";
@@ -21,6 +22,9 @@ export function Navbar() {
     await signOut();
     router.push("/");
   };
+
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
 
   return (
     <header
@@ -66,19 +70,40 @@ export function Navbar() {
             <div className="hidden items-center gap-2 md:flex">
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 rounded-lg bg-secondary/60 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-secondary"
+                className="flex items-center gap-2 rounded-full bg-secondary/80 p-1 pr-3 text-xs font-medium text-foreground transition-all hover:bg-secondary hover:shadow-sm"
               >
-                <UserIcon className="h-3.5 w-3.5 text-primary" />
-                <span className="max-w-[120px] truncate">
-                  {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt={userName}
+                    width={28}
+                    height={28}
+                    className="h-7 w-7 rounded-full object-cover border border-primary/30"
+                  />
+                ) : (
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                    {userName[0]?.toUpperCase() || "U"}
+                  </div>
+                )}
+                <span className="max-w-[120px] truncate font-semibold">
+                  {userName}
                 </span>
               </Link>
+
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                title="Dashboard"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+              </Link>
+
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+                title="Sign Out"
               >
                 <LogOut className="h-3.5 w-3.5" />
-                Sign Out
               </button>
             </div>
           ) : (

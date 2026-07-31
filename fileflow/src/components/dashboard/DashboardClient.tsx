@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { FileCheck, HardDrive, Zap, Trash2, Clock, UserCheck, ShieldCheck } from "lucide-react";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { formatFileSize } from "@/lib/utils";
@@ -75,21 +76,37 @@ export function DashboardClient() {
   const totalConversions = history.length;
   const totalStorage = history.reduce((acc, item) => acc + (item.outputSize || 0), 0);
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Welcome back, <span className="text-primary">{userName}</span>!
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            Here is an overview of your file conversion activity and account details.
-          </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3.5">
+          {avatarUrl ? (
+            <Image
+              src={avatarUrl}
+              alt={userName}
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-full object-cover border-2 border-primary/30 shadow-md shrink-0"
+            />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground shadow-md shrink-0">
+              {userName[0]?.toUpperCase() || "U"}
+            </div>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              Welcome back, <span className="text-primary">{userName}</span>!
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Here is an overview of your file conversion activity and account details.
+            </p>
+          </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-3.5 py-1.5 text-xs font-medium">
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-3.5 py-1.5 text-xs font-medium self-start sm:self-center">
           {isDemoMode ? (
             <>
               <UserCheck className="h-3.5 w-3.5 text-amber-500" />

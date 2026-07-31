@@ -1,6 +1,7 @@
 "use client";
 
-import { Crown, LogOut, ShieldCheck, UserCheck } from "lucide-react";
+import Image from "next/image";
+import { Crown, LogOut, ShieldCheck, UserCheck, Mail, Calendar, User as UserIcon } from "lucide-react";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -14,8 +15,18 @@ export default function ProfilePage() {
     router.push("/");
   };
 
-  const name = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const name = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
   const email = user?.email || "guest@example.com";
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const provider = user?.app_metadata?.provider || (isDemoMode ? "demo" : "email");
+  const createdAt = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "Recently";
+
   const initials = name
     .split(" ")
     .map((part: string) => part[0])
@@ -35,9 +46,19 @@ export default function ProfilePage() {
       <GlassCard className="p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shadow-lg shrink-0">
-              {initials}
-            </div>
+            {avatarUrl ? (
+              <Image
+                src={avatarUrl}
+                alt={name}
+                width={80}
+                height={80}
+                className="h-20 w-20 rounded-full object-cover border-2 border-primary/30 shadow-lg shrink-0"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground shadow-lg shrink-0">
+                {initials}
+              </div>
+            )}
             <div>
               <h2 className="text-xl font-bold">{name}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{email}</p>
@@ -54,7 +75,7 @@ export default function ProfilePage() {
                   ) : (
                     <>
                       <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                      <span className="text-emerald-500">Supabase Connected</span>
+                      <span className="text-emerald-500">Supabase Connected ({provider})</span>
                     </>
                   )}
                 </span>
@@ -75,8 +96,8 @@ export default function ProfilePage() {
         <div className="border-t border-border/50 pt-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                Full Name
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                <UserIcon className="h-3.5 w-3.5" /> Full Name
               </label>
               <input
                 type="text"
@@ -86,13 +107,24 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                Email Address
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5" /> Email Address
               </label>
               <input
                 type="email"
                 readOnly
                 value={email}
+                className="w-full rounded-xl bg-secondary/30 px-4 py-2.5 text-sm border border-border focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" /> Member Since
+              </label>
+              <input
+                type="text"
+                readOnly
+                value={createdAt}
                 className="w-full rounded-xl bg-secondary/30 px-4 py-2.5 text-sm border border-border focus:outline-none"
               />
             </div>
