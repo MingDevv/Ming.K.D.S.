@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Mail, Loader2, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Logo } from "@/components/shared/Logo";
-import { GithubIcon } from "@/components/shared/Icons";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
@@ -39,10 +38,10 @@ export default function RegisterPage() {
     }
   };
 
-  const handleOAuth = async (provider: "github" | "google") => {
+  const handleGoogleLogin = async () => {
     setErrorMsg(null);
     setLoading(true);
-    const { error } = await signInWithOAuth(provider);
+    const { error } = await signInWithOAuth("google");
     if (error) {
       setErrorMsg(error.message);
       setLoading(false);
@@ -161,24 +160,14 @@ export default function RegisterPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => handleOAuth("github")}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50"
-            >
-              <GithubIcon className="h-4 w-4" /> Github
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOAuth("google")}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50"
-            >
-              <Mail className="h-4 w-4" /> Google
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50"
+          >
+            <Mail className="h-4 w-4 text-red-500" /> Continue with Google
+          </button>
         </GlassCard>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
