@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { FileCheck, HardDrive, Zap, Trash2, Clock } from "lucide-react";
+import { FileCheck, HardDrive, Zap, Trash2, Clock, UserCheck, ShieldCheck } from "lucide-react";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { formatFileSize } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 interface HistoryItem {
   id: string;
@@ -43,6 +44,7 @@ const mockDefaultHistory: HistoryItem[] = [
 ];
 
 export function DashboardClient() {
+  const { user, isDemoMode } = useAuth();
   const [history, setHistory] = useState<HistoryItem[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -73,13 +75,33 @@ export function DashboardClient() {
   const totalConversions = history.length;
   const totalStorage = history.reduce((acc, item) => acc + (item.outputSize || 0), 0);
 
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Welcome back! Here is an overview of your recent conversion activity.
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Welcome back, <span className="text-primary">{userName}</span>!
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+            Here is an overview of your file conversion activity and account details.
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-3.5 py-1.5 text-xs font-medium">
+          {isDemoMode ? (
+            <>
+              <UserCheck className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-amber-500 font-semibold">Demo Mode Account</span>
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="text-emerald-500 font-semibold">Supabase Authenticated</span>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Metric Cards */}
