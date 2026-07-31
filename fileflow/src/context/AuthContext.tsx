@@ -10,7 +10,7 @@ interface AuthContextType {
   loading: boolean;
   isDemoMode: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error: Error | null }>;
+  signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error: Error | null; requiresConfirmation?: boolean }>;
   signInWithOAuth: (provider: "github" | "google") => Promise<{ error: Error | null }>;
   resetPasswordForEmail: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (password: string) => Promise<{ error: Error | null }>;
@@ -44,6 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(() => (isSupabaseConfigured() ? true : false));
 
   const supabase = createClient();
+
+  const refreshSession = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+    } catch (err) {
+      console.warn("Session refresh error:", err);
+    }
+  };
 
   useEffect(() => {
     if (!isDemoMode) {
@@ -95,11 +105,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      return { error };
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        return { error: new Error(data.error || "Login failed. Please check your credentials.") };
+      }
+
+      await refreshSession();
+      return { error: null };
     } catch (err: unknown) {
       return { error: err as Error };
     }
@@ -123,21 +142,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(mockUser);
       localStorage.setItem(DEMO_USER_KEY, JSON.stringify(mockUser));
-      return { error: null };
+      return { error: null, requiresConfirmation: false };
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
       });
-      return { error };
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        return { error: new Error(data.error || "Registration failed. Please try again.") };
+      }
+
+      await refreshSession();
+      return { error: null, requiresConfirmation: data.requiresConfirmation };
     } catch (err: unknown) {
       return { error: err as Error };
     }

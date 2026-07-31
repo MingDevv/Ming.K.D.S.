@@ -25,10 +25,13 @@ export default function RegisterPage() {
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    const { error } = await signUpWithEmail(email, password, name);
+    const { error, requiresConfirmation } = await signUpWithEmail(email, password, name);
 
     if (error) {
       setErrorMsg(error.message);
+      setLoading(false);
+    } else if (requiresConfirmation) {
+      setSuccessMsg("Account created! Please check your email inbox to confirm your account before logging in.");
       setLoading(false);
     } else {
       setSuccessMsg("Account created! Redirecting to Dashboard...");
@@ -85,8 +88,8 @@ export default function RegisterPage() {
           )}
 
           {successMsg && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3 text-xs text-emerald-500">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3 text-xs text-emerald-500 leading-relaxed">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
               <span>{successMsg}</span>
             </div>
           )}
