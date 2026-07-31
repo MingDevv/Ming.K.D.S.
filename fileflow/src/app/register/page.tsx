@@ -2,20 +2,51 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Mail, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { Logo } from "@/components/shared/Logo";
 import { GithubIcon } from "@/components/shared/Icons";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signUpWithEmail, signInWithOAuth } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // UI scaffold for now
-    window.location.href = "/dashboard";
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const { error } = await signUpWithEmail(email, password, name);
+
+    if (error) {
+      setErrorMsg(error.message);
+      setLoading(false);
+    } else {
+      setSuccessMsg("Account created! Please check your email for confirmation or log in.");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
+    }
+  };
+
+  const handleOAuth = async (provider: "github" | "google") => {
+    setErrorMsg(null);
+    setLoading(true);
+    const { error } = await signInWithOAuth(provider);
+    if (error) {
+      setErrorMsg(error.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,6 +61,20 @@ export default function RegisterPage() {
         </div>
 
         <GlassCard className="p-8">
+          {errorMsg && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-xs text-destructive">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-3 text-xs text-emerald-500">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1.5">
@@ -66,18 +111,28 @@ export default function RegisterPage() {
               <input
                 type="password"
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
                 className="w-full rounded-xl bg-secondary/50 px-4 py-2.5 text-sm border border-border focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:brightness-110"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:brightness-110 disabled:opacity-50"
             >
-              Get Started Free <ArrowRight className="h-4 w-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Creating Account...
+                </>
+              ) : (
+                <>
+                  Get Started Free <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </button>
           </form>
 
@@ -90,10 +145,20 @@ export default function RegisterPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80">
+            <button
+              type="button"
+              onClick={() => handleOAuth("github")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50"
+            >
               <GithubIcon className="h-4 w-4" /> Github
             </button>
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80">
+            <button
+              type="button"
+              onClick={() => handleOAuth("google")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-xs font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50"
+            >
               <Mail className="h-4 w-4" /> Google
             </button>
           </div>

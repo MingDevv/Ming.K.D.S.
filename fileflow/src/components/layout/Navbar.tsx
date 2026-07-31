@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogIn } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "./ThemeToggle";
 import { MobileNav } from "./MobileNav";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { mainNavItems } from "@/config/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const pathname = usePathname();
   const { isScrolled } = useScrollPosition();
+  const { user, signOut } = useAuth();
 
   return (
     <header
@@ -52,20 +54,43 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          <Link
-            href="/login"
-            className="hidden items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:flex"
-          >
-            <LogIn className="h-4 w-4" />
-            Sign In
-          </Link>
+          {user ? (
+            <div className="hidden items-center gap-3 md:flex">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 rounded-lg bg-secondary/60 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <UserIcon className="h-3.5 w-3.5 text-primary" />
+                <span className="max-w-[120px] truncate">
+                  {user.user_metadata?.full_name || user.email}
+                </span>
+              </Link>
+              <button
+                onClick={() => signOut()}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:flex"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </Link>
 
-          <Link
-            href="/register"
-            className="hidden rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-primary/40 hover:brightness-110 md:block"
-          >
-            Get Started
-          </Link>
+              <Link
+                href="/register"
+                className="hidden rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-primary/40 hover:brightness-110 md:block"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu */}
           <MobileNav />
